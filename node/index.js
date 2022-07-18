@@ -8,17 +8,25 @@ const config = {
     database: 'nodedb'
 }
 const mysql = require('mysql')
+const connection = mysql.createConnection(config)
 
+connection.connect((err) => {
+    if(err) throw err
+    const sqlForCreateTable = ` CREATE TABLE IF NOT EXISTS people ( id int NOT NULL AUTO_INCREMENT, name varchar(255), PRIMARY KEY (id) );`
+    connection.query(sqlForCreateTable, (err) => {
+        if (err) throw err;
+    })
+})
 
 app.get('/', (req,res) => {
-    const connection = mysql.createConnection(config)
     let body = "<h1>Full Cycle Rocks!</h1>"
+    const newConnection = mysql.createConnection(config)
 
-    const sql = `INSERT INTO people(name) values('Testador')`
-    connection.query(sql)
+    const sqlForInsert = `INSERT INTO people(name) values('Testador');`
+    newConnection.query(sqlForInsert)
 
-    const selectPeopleSQL = `SELECT * FROM people`
-    connection.query(selectPeopleSQL, (err, result) => {
+    const sqlForSelectPeople = `SELECT * FROM people;`
+    newConnection.query(sqlForSelectPeople, (err, result) => {
         if (err) throw err;
         result.map(item => {
             body = body + `<br/> <h5>id: ${item.id}, name: ${item.name}<h5/>`
@@ -26,7 +34,7 @@ app.get('/', (req,res) => {
         
         res.send(body)
     })
-    connection.end()
+    newConnection.end()
 })
 
 app.listen(port, () => {
